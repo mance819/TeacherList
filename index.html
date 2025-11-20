@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teacher Course List</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .stats {
+        display: flex;
+        justify-content: space-around;
+        padding: 20px;
+        background: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+      }
+
+      .stat-item {
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 2em;
+        font-weight: bold;
+        color: #667eea;
+      }
+
+      .stat-label {
+        color: #6c757d;
+        font-size: 0.9em;
+        margin-top: 5px;
+      }
+
+      .table-container {
+        overflow-x: auto;
+        padding: 20px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+      }
+
+      thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95em;
+        letter-spacing: 0.5px;
+      }
+
+      td {
+        padding: 15px;
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      tbody tr {
+        transition: all 0.3s ease;
+      }
+
+      tbody tr:hover {
+        background: #f8f9fa;
+        transform: scale(1.01);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      tbody tr.contacted {
+        background: #d4edda;
+      }
+
+      tbody tr.contacted:hover {
+        background: #c3e6cb;
+      }
+
+      .checkbox-cell {
+        text-align: center;
+        width: 80px;
+      }
+
+      .checkbox-wrapper {
+        display: inline-block;
+        position: relative;
+      }
+
+      input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        accent-color: #667eea;
+      }
+
+      a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+      }
+
+      .course-title {
+        max-width: 400px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .number-cell {
+        text-align: center;
+        font-weight: 600;
+        color: #495057;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 1.2em;
+        color: #6c757d;
+      }
+
+      .error {
+        text-align: center;
+        padding: 50px;
+        font-size: 1.2em;
+        color: #dc3545;
+        background: #f8d7da;
+        margin: 20px;
+        border-radius: 10px;
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 1.8em;
+        }
+
+        .stats {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        table {
+          font-size: 0.9em;
+        }
+
+        th,
+        td {
+          padding: 10px 5px;
+        }
+      }
+
+      .filter-section {
+        padding: 20px;
+        background: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+      }
+
+      .filter-group {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .filter-group label {
+        font-weight: 600;
+        color: #495057;
+      }
+
+      .filter-group input,
+      .filter-group select {
+        padding: 8px 12px;
+        border: 2px solid #dee2e6;
+        border-radius: 5px;
+        font-size: 1em;
+        transition: all 0.3s ease;
+      }
+
+      .filter-group input:focus,
+      .filter-group select:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .filter-group button {
+        padding: 8px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .filter-group button:hover {
+        background: #764ba2;
+        transform: translateY(-2px);
+      }
+    </style>
+  </head>
+  <body>
+    <dis iv class="container">
+      <div class="header">
+        <h1>📚 Teacher Course Tracker</h1>
+        <p>Manage and track your teacher outreach</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-number" id="totalCourses">0</div>
+          <div class="stat-label">Total Courses</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="totalTeachers">0</div>
+          <div class="stat-label">Unique Teachers</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="contacted">0</div>
+          <div class="stat-label">Contacted</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="remaining">0</div>
+          <div class="stat-label">Remaining</div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-group">
+          <label>Category:</label>
+          <select id="categorySelect">
+            <option value="design">Design</option>
+            <option value="design-new">Design (New People)</option>
+            <option value="game-dev">Game Development</option>
+            <option value="photography">Photography</option>
+            <option value="webdev-mid">Web Dev (Mid-Big)</option>
+            <option value="webdev-new">Web Dev (New People)</option>
+          </select>
+
+          <label>Search:</label>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search by course or teacher name..."
+          />
+
+          <label>Filter:</label>
+          <select id="filterSelect">
+            <option value="all">All</option>
+            <option value="contacted">Contacted</option>
+            <option value="not-contacted">Not Contacted</option>
+          </select>
+
+          <label>Sort by:</label>
+          <select id="sortSelect">
+            <option value="none">Default</option>
+            <option value="reviews-desc">Reviews (High to Low)</option>
+            <option value="reviews-asc">Reviews (Low to High)</option>
+            <option value="subscribers-desc">Subscribers (High to Low)</option>
+            <option value="subscribers-asc">Subscribers (Low to High)</option>
+            <option value="date-desc">Date (Newest First)</option>
+            <option value="date-asc">Date (Oldest First)</option>
+          </select>
+
+          <button id="clearBtn">Clear All Contacts</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table id="courseTable">
+          <thead>
+            <tr>
+              <th class="checkbox-cell">Contacted</th>
+              <th>Course Name</th>
+              <th>Teacher Name</th>
+              <th>Teacher Link</th>
+              <th>Course Link</th>
+              <th class="number-cell">Subscribers</th>
+              <th class="number-cell">Reviews</th>
+            </tr>
+          </thead>
+          <tbody id="courseTableBody">
+            <tr>
+              <td colspan="7" class="loading">Loading courses...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      let allCourses = [];
+      let contactedTeachers = new Set();
+      let currentCategory = "design";
+
+      // Category to filename mapping
+      const categoryFiles = {
+        design: "courses.json",
+        "design-new": "design_newpeople.json",
+        "game-dev": "game-development.json",
+        photography: "photography.json",
+        "webdev-mid": "webdeveloper-midBig.json",
+        "webdev-new": "webdevloper-newpeople.json",
+      };
+
+      // Load contacted teachers from server JSON file
+      async function loadContactedTeachers() {
+        try {
+          const response = await fetch('json/contacted.json');
+          if (response.ok) {
+            const data = await response.json();
+            contactedTeachers = new Set(data.contactedTeachers || []);
+          } else {
+            // Fallback to localStorage if server file doesn't exist yet
+            const stored = localStorage.getItem("contactedTeachers");
+            if (stored) {
+              contactedTeachers = new Set(JSON.parse(stored));
+            }
+          }
+        } catch (error) {
+          console.error('Error loading contacted teachers:', error);
+          // Fallback to localStorage
+          const stored = localStorage.getItem("contactedTeachers");
+          if (stored) {
+            contactedTeachers = new Set(JSON.parse(stored));
+          } else {
+            contactedTeachers = new Set();
+          }
+        }
+      }
+
+      // Save contacted teachers to server JSON file
+      async function saveContactedTeachers() {
+        // Save to localStorage as backup
+        localStorage.setItem(
+          "contactedTeachers",
+          JSON.stringify([...contactedTeachers])
+        );
+        
+        // Try to save to server (Vercel serverless function)
+        try {
+          const response = await fetch('/api/save-progress', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              contactedTeachers: [...contactedTeachers]
+            })
+          });
+          
+          if (!response.ok) {
+            console.warn('Server save failed, using localStorage only');
+          }
+        } catch (error) {
+          console.warn('Server not available, using localStorage only:', error.message);
+        }
+      }
+
+      // Toggle contacted status
+      function toggleContacted(teacherUrl, checkbox, row) {
+        if (checkbox.checked) {
+          contactedTeachers.add(teacherUrl);
+          row.classList.add("contacted");
+        } else {
+          contactedTeachers.delete(teacherUrl);
+          row.classList.remove("contacted");
+        }
+        saveContactedTeachers();
+        updateStats();
+      }
+
+      // Load courses from JSON file based on category
+      async function loadCourses(category = currentCategory) {
+        try {
+          const fileName = categoryFiles[category];
+          const response = await fetch(`json/${fileName}`);
+          if (!response.ok) {
+            throw new Error("Failed to load courses");
+          }
+          const coursesData = await response.json();
+
+          // Filter for English courses only
+          const englishCourses = coursesData.filter((course) => {
+            return (
+              course.locale &&
+              course.locale.locale &&
+              course.locale.locale.startsWith("en_")
+            );
+          });
+
+          allCourses = englishCourses;
+          currentCategory = category;
+          renderTable(allCourses);
+          updateStats();
+        } catch (error) {
+          console.error("Error loading courses:", error);
+          document.getElementById("courseTableBody").innerHTML =
+            '<tr><td colspan="7" class="error">Error loading courses. Please make sure the file is hosted on a web server.</td></tr>';
+        }
+      }
+
+      // Handle category change
+      async function changeCategory() {
+        const category = document.getElementById("categorySelect").value;
+        document.getElementById("courseTableBody").innerHTML =
+          '<tr><td colspan="7" class="loading">Loading courses...</td></tr>';
+        await loadCourses(category);
+      }
+
+      // Render the table
+      function renderTable(courses) {
+        const tbody = document.getElementById("courseTableBody");
+
+        if (courses.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="7" class="loading">No courses found</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = courses
+          .map((course) => {
+            const teacher = course.visible_instructors[0];
+            const teacherUrl = teacher.url;
+            const isContacted = contactedTeachers.has(teacherUrl);
+
+            return `
+                    <tr class="${
+                      isContacted ? "contacted" : ""
+                    }" data-teacher-url="${teacherUrl}">
+                        <td class="checkbox-cell">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" 
+                                       ${isContacted ? "checked" : ""}
+                                       onchange="toggleContacted('${teacherUrl}', this, this.closest('tr'))">
+                            </div>
+                        </td>
+                        <td class="course-title" title="${course.title}">
+                            ${course.title}
+                        </td>
+                        <td>${teacher.display_name}</td>
+                        <td><a href="${
+                          teacher.url
+                        }" target="_blank">View Profile</a></td>
+                        <td><a href="${
+                          course.url
+                        }" target="_blank">View Course</a></td>
+                        <td class="number-cell">${course.num_subscribers.toLocaleString()}</td>
+                        <td class="number-cell">${course.num_reviews.toLocaleString()}</td>
+                    </tr>
+                `;
+          })
+          .join("");
+      }
+
+      // Update statistics
+      function updateStats() {
+        const uniqueTeachers = new Set(
+          allCourses.map((c) => c.visible_instructors[0].url)
+        );
+        const contactedCount = contactedTeachers.size;
+
+        document.getElementById("totalCourses").textContent = allCourses.length;
+        document.getElementById("totalTeachers").textContent =
+          uniqueTeachers.size;
+        document.getElementById("contacted").textContent = contactedCount;
+        document.getElementById("remaining").textContent =
+          uniqueTeachers.size - contactedCount;
+      }
+
+      // Search and filter functionality
+      function filterCourses() {
+        const searchTerm = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        const filterValue = document.getElementById("filterSelect").value;
+        const sortValue = document.getElementById("sortSelect").value;
+
+        let filtered = allCourses;
+
+        // Apply search
+        if (searchTerm) {
+          filtered = filtered.filter((course) => {
+            const teacher = course.visible_instructors[0];
+            return (
+              course.title.toLowerCase().includes(searchTerm) ||
+              teacher.display_name.toLowerCase().includes(searchTerm)
+            );
+          });
+        }
+
+        // Apply filter
+        if (filterValue === "contacted") {
+          filtered = filtered.filter((course) =>
+            contactedTeachers.has(course.visible_instructors[0].url)
+          );
+        } else if (filterValue === "not-contacted") {
+          filtered = filtered.filter(
+            (course) =>
+              !contactedTeachers.has(course.visible_instructors[0].url)
+          );
+        }
+
+        // Apply sort
+        if (sortValue !== "none") {
+          filtered = [...filtered]; // Create a copy to avoid mutating original
+
+          switch (sortValue) {
+            case "reviews-desc":
+              filtered.sort((a, b) => b.num_reviews - a.num_reviews);
+              break;
+            case "reviews-asc":
+              filtered.sort((a, b) => a.num_reviews - b.num_reviews);
+              break;
+            case "subscribers-desc":
+              filtered.sort((a, b) => b.num_subscribers - a.num_subscribers);
+              break;
+            case "subscribers-asc":
+              filtered.sort((a, b) => a.num_subscribers - b.num_subscribers);
+              break;
+            case "date-desc":
+              filtered.sort(
+                (a, b) => new Date(b.created) - new Date(a.created)
+              );
+              break;
+            case "date-asc":
+              filtered.sort(
+                (a, b) => new Date(a.created) - new Date(b.created)
+              );
+              break;
+          }
+        }
+
+        renderTable(filtered);
+      }
+
+      // Clear all contacts
+      document.getElementById("clearBtn").addEventListener("click", () => {
+        if (confirm("Are you sure you want to clear all contact records?")) {
+          contactedTeachers.clear();
+          saveContactedTeachers();
+          renderTable(allCourses);
+          updateStats();
+        }
+      });
+
+      // Add event listeners
+      document
+        .getElementById("categorySelect")
+        .addEventListener("change", changeCategory);
+      document
+        .getElementById("searchInput")
+        .addEventListener("input", filterCourses);
+      document
+        .getElementById("filterSelect")
+        .addEventListener("change", filterCourses);
+      document
+        .getElementById("sortSelect")
+        .addEventListener("change", filterCourses);
+
+      // Initialize
+      (async function() {
+        await loadContactedTeachers();
+        await loadCourses();
+      })();
+    </script>
+  </body>
+</html>
